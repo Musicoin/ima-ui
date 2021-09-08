@@ -65,13 +65,11 @@ class WithdrawETH extends React.Component {
   async componentDidMount() {
     let res = await changeMetamaskNetwork(schainNetworkParams());
     let web3 = res[1];
-    let accounts = await web3.eth.getAccounts();
-    let account = accounts[0];
 
     this.setState({
       sChain: new SChain(web3, proxySchain),
-      address: account,
-      receiver: account
+      address: this.props.currentAccount,
+      receiver: this.props.currentAccount
     });
     await this.web3Lookup();
 

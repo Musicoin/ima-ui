@@ -80,8 +80,6 @@ export default class Recharge extends React.Component {
   async componentDidMount () {
     let res = await changeMetamaskNetwork(mainnetNetworkParams());
     let web3 = res[1];
-    let accounts = await web3.eth.getAccounts();
-    let account = accounts[0];
 
     if (this.props.currentSchain && (this.state.chain !== this.props.currentSchain)) {
       this.setState({chain: this.props.currentSchain});
@@ -89,8 +87,8 @@ export default class Recharge extends React.Component {
 
     this.setState({
       mainnetChain: new MainnetChain(web3, proxyMainnet),
-      address: account,
-      receiver: account,
+      address: this.props.currentAccount,
+      receiver: this.props.currentAccount,
       loading: false
     }); // todo: handle network change
   }

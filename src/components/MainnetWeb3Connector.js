@@ -21,7 +21,7 @@
  * @copyright SKALE Labs 2021-Present
 */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import Button from '@material-ui/core/Button';
 import SaveIcon from '@material-ui/icons/Save';
@@ -61,12 +61,57 @@ export default function MainnetWeb3Connector(props) {
   const [inputEndpoint, setInputEndpoint] = React.useState(localStorage.getItem('skMainnetEndpoint') || '');
   const open = Boolean(edit);
 
+
+
+  const addListeners = () => {
+    window.ethereum.on('accountsChanged', handleAccountsChanged); // todo: do only once!!!!
+    window.ethereum
+    .request({ method: 'eth_accounts' })
+    .then(handleAccountsChanged)
+    .catch((err) => {
+      // Some unexpected error.
+      // For backwards compatibility reasons, if no accounts are available,
+      // eth_accounts will return an empty array.
+      console.error(err);
+    });
+  }
+
+  useEffect(() => {
+    addListeners();
+  }, []);
+
+  const handleAccountsChanged = (accounts) => {
+    if (accounts.length === 0) {
+      // MetaMask is locked or the user has not connected any accounts
+      console.log('Please connect to MetaMask!');
+    } else if (accounts[0] !== props.currentAccount) {
+      props.setCurrentAccount(accounts[0]);
+      // Do any other work!
+    }
+  }
+
+  const connect = () => {
+    window.ethereum
+      .request({ method: 'eth_requestAccounts' })
+      .then(handleAccountsChanged)
+      .catch((err) => {
+        if (err.code === 4001) {
+          // EIP-1193 userRejectedRequest error
+          // If this happens, the user rejected the connection request.
+          console.log('Please connect to MetaMask.');
+        } else {
+          console.error(err);
+        }
+      });
+  }
+
   const handleEditClick = () => {
     setEdit(true);
   };
 
   const handleSaveClick = () => {
     setEdit(false);
+    connect();
     props.setEndpoint(inputEndpoint);
     localStorage.setItem('skMainnetEndpoint', inputEndpoint);
   };

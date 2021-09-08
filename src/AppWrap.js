@@ -49,6 +49,7 @@ function AppWrap() {
   const [mainnetWeb3, setMainnetWeb3] = useState(undefined);
   // const [schainWeb3, setSchainWeb3] = useState(undefined);
   const [currentSchain, setCurrentSchain] = useState('');
+  const [currentAccount, setCurrentAccount] = useState(undefined);
 
   // useEffect(() => {
   //   async function getMainnetWeb3() {
@@ -82,29 +83,32 @@ function AppWrap() {
           mainnetWeb3={mainnetWeb3}
           currentSchain={currentSchain}
           setCurrentSchain={setCurrentSchain}
+
+          currentAccount={currentAccount}
+          setCurrentAccount={setCurrentAccount}
         />
       <div className='mainApp'>
         <Switch>
           <Route path="/eth/deposit">
-            <DepositETH mainnetWeb3={mainnetWeb3} currentSchain={currentSchain}/>
+            <DepositETH mainnetWeb3={mainnetWeb3} currentSchain={currentSchain} currentAccount={currentAccount}/>
           </Route>
           <Route path="/eth/withdraw">
-            <WithdrawETH mainnetWeb3={mainnetWeb3} currentSchain={currentSchain} />
+            <WithdrawETH mainnetWeb3={mainnetWeb3} currentSchain={currentSchain} currentAccount={currentAccount}/>
           </Route>
           <Route path="/eth/unlock">
-            <UnlockETH mainnetWeb3={mainnetWeb3} currentSchain={currentSchain}/>
+            <UnlockETH mainnetWeb3={mainnetWeb3} currentSchain={currentSchain} currentAccount={currentAccount}/>
           </Route>
 
           <Route path="/reimbursement/recharge">
-            <Recharge mainnetWeb3={mainnetWeb3} currentSchain={currentSchain}/>
+            <Recharge mainnetWeb3={mainnetWeb3} currentSchain={currentSchain} currentAccount={currentAccount}/>
           </Route>
 
           <Route path="/reimbursement/withdraw">
-            <Withdraw mainnetWeb3={mainnetWeb3} currentSchain={currentSchain}/>
+            <Withdraw mainnetWeb3={mainnetWeb3} currentSchain={currentSchain} currentAccount={currentAccount}/>
           </Route>
 
           <Route path="/">
-            <Dashboard mainnetWeb3={mainnetWeb3} currentSchain={currentSchain}/>
+            <Dashboard mainnetWeb3={mainnetWeb3} currentSchain={currentSchain} currentAccount={currentAccount}/>
           </Route>
         </Switch>
       </div>

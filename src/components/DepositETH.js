@@ -54,7 +54,7 @@ class DepositETH extends React.Component {
         receiver: '',
         address: '',
         wait: false,
-        redirect: false,
+        redirect: false
     };
     this.depositETH=this.depositETH.bind(this);
     this.handleReceiverChange=this.handleReceiverChange.bind(this);
@@ -79,33 +79,34 @@ class DepositETH extends React.Component {
     this.setState({redirect: true});
   }
 
-    handleReceiverChange(e) {
-        this.setState({receiver: e.target.value});
+  handleReceiverChange(e) {
+      this.setState({receiver: e.target.value});
+  }
+
+  handleAmountChange(e) {
+      this.setState({amount: e.target.value});
+  }
+
+  async componentDidMount () {
+    let res = await changeMetamaskNetwork(mainnetNetworkParams());
+    let web3 = res[1];
+
+    if (this.props.currentSchain && (this.state.chain !== this.props.currentSchain || !this.state.sChain)) {
+      let sChainEndpoint = getSchainEndpoint(this.props.currentSchain);
+      let sChainWeb3 = new Web3(sChainEndpoint);
+      this.setState({sChain: new SChain(sChainWeb3, proxySchain)});
     }
+    if (!this.state.sChain) return; 
 
-    handleAmountChange(e) {
-        this.setState({amount: e.target.value});
-    }
-
-    async componentDidMount () {
-      let res = await changeMetamaskNetwork(mainnetNetworkParams());
-      let web3 = res[1];
-      let accounts = await web3.eth.getAccounts();
-      let account = accounts[0];
-
-      if (this.props.currentSchain && (this.state.chain !== this.props.currentSchain || !this.state.sChain)) {
-        let sChainEndpoint = getSchainEndpoint(this.props.currentSchain);
-        let sChainWeb3 = new Web3(sChainEndpoint);
-        this.setState({sChain: new SChain(sChainWeb3, proxySchain)});
-      }
-      if (!this.state.sChain) return; 
-
-      this.setState({
-        mainnetChain: new MainnetChain(web3, proxyMainnet),
-        address: account,
-        receiver: account
-      }); // todo: handle network change
-    }
+    this.setState({
+      mainnetChain: new MainnetChain(web3, proxyMainnet),
+      address: this.props.currentAccount,
+      receiver: this.props.currentAccount,
+      loading: false,
+      chain: this.props.currentSchain,
+      account: this.props.currentAccount
+    }); // todo: handle network change
+  }
 
   render() {
     const { redirect, wait } = this.state;

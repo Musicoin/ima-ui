@@ -65,10 +65,10 @@ function createData(name, calories, fat, carbs, protein, icon) {
 
 
 const rows = [
-  createData('SKL', 1590, 600.0, 240, 4.0, skLogo),
-  createData('USDT', 2370, 900.0, 370, 4.3, tetherLogo),
-  createData('USDC', 2620, 16.0, 240, 6.0, usdcLogo),
-  createData('UNI', 5900, 1211.0, 9140, 6.0, uniLogo),
+  createData('SKL', '150000.0', '600.0', 240, 4.0, skLogo),
+  createData('USDT', '2300.5', '900.0', 370, 4.3, tetherLogo),
+  createData('USDC', 0, 0, 0, 6.0, usdcLogo),
+  createData('UNI', '5900.0', 0, 9140, 6.0, uniLogo),
 ];
 
 
@@ -78,7 +78,8 @@ class Dashboard extends React.Component {
     this.state = {
         loading: true,
         chain: '',
-        chainChanged: false
+        chainChanged: false,
+        disableWithdrawETH: true
     };
     this.balanceChecker=this.balanceChecker.bind(this);
   }
@@ -103,18 +104,16 @@ class Dashboard extends React.Component {
     }
     if (!this.state.sChain) return; 
 
-    let accounts = await this.state.mainnetChain.web3.eth.getAccounts();
-    let account = accounts[0];
-
-    let mainnetBalance = await this.state.mainnetChain.ethBalance(account);
-    let schainBalance = await this.state.sChain.ethBalance(account);
-    let lockedAmount = await this.state.mainnetChain.lockedETHAmount(account);
+    let mainnetBalance = await this.state.mainnetChain.ethBalance(this.props.currentAccount);
+    let schainBalance = await this.state.sChain.ethBalance(this.props.currentAccount);
+    let lockedAmount = await this.state.mainnetChain.lockedETHAmount(this.props.currentAccount);
 
     let schainName = getSchainName(this.props.currentSchain);
 
     let reimbursementWalletBalance = await this.state.mainnetChain.reimbursementWalletBalance(
-      schainName, account);
-
+      schainName, this.props.currentAccount);
+    
+    let disableWithdrawETH = reimbursementWalletBalance == 0;
     this.setState({
       loading: false,
       chainChanged: false,
@@ -122,7 +121,9 @@ class Dashboard extends React.Component {
       lockedAmount: lockedAmount,
       mainnetBalance: mainnetBalance,
       sChainBalance: schainBalance,
-      reimbursementWalletBalance: reimbursementWalletBalance
+      reimbursementWalletBalance: reimbursementWalletBalance,
+      disableWithdrawETH: disableWithdrawETH,
+      account: this.props.currentAccount,
     });
   }
 
@@ -147,7 +148,7 @@ class Dashboard extends React.Component {
             </div>
       );
     }
-    if (loading || this.state.chain !== this.props.currentSchain) {
+    if (loading || this.state.chain !== this.props.currentSchain ||  this.state.account !== this.props.currentAccount) {
       return (
         <div className="fullscreen-msg">
           <div>
@@ -157,7 +158,7 @@ class Dashboard extends React.Component {
               </div>  
               <div className="flex-container fl-centered">
                 <h3 className='fullscreen-msg-text'>
-                  Loading {this.props.currentSchain}
+                  Loading {this.props.currentSchain} 
                 </h3>
               </div>
             </div>
@@ -199,8 +200,8 @@ class Dashboard extends React.Component {
                           <Link className='table-btn' to="/reimbursement/recharge">
                             <SkBtn color="primary" >Recharge</SkBtn>
                           </Link>
-                          <Link className='table-btn' to="/reimbursement/withdraw">
-                            <SkBtn color="primary">Withdraw</SkBtn>
+                          <Link className='table-btn' to={this.state.disableWithdrawETH ? '#' : '/reimbursement/withdraw'}>
+                            <SkBtn color="primary" disabled={this.state.disableWithdrawETH}>Withdraw</SkBtn>
                           </Link>
 
                           </TableCell>
@@ -252,11 +253,11 @@ class Dashboard extends React.Component {
                           <Link className='table-btn' to="/eth/deposit">
                             <SkBtn color="primary" >Deposit</SkBtn>
                           </Link>
-                          <Link className='table-btn' to="/eth/withdraw">
-                            <SkBtn color="primary">Withdraw</SkBtn>
+                          <Link className='table-btn' to={this.state.disableWithdrawETH ? '#' : '/eth/withdraw'}>
+                            <SkBtn color="primary" disabled={this.state.disableWithdrawETH} >Withdraw</SkBtn>
                           </Link>
-                          <Link className='table-btn' to="/eth/unlock">
-                            <SkBtn color="primary" >Unlock</SkBtn>
+                          <Link className='table-btn' to={this.state.disableWithdrawETH ? '#' : '/eth/unlock'}>
+                            <SkBtn color="primary" disabled={this.state.disableWithdrawETH}>Unlock</SkBtn>
                           </Link>
                           </TableCell>
                       </TableRow>
@@ -270,7 +271,7 @@ class Dashboard extends React.Component {
               <h3>
                 ERC20 Tokens
               </h3>
-              <TableContainer component={Paper}>
+              <TableContainer component={Paper} className='marg-bott-40'>
                 <Table aria-label="simple table">
                 <TableHead>
                     <TableRow>
@@ -299,8 +300,8 @@ class Dashboard extends React.Component {
                         <Link className='table-btn' to="/eth/deposit">
                             <SkBtn color="primary" >Deposit</SkBtn>
                           </Link>
-                          <Link className='table-btn' to="/eth/withdraw">
-                            <SkBtn color="primary">Withdraw</SkBtn>
+                          <Link className='table-btn' to={this.state.disableWithdrawETH ? '#' : "/eth/withdraw"}>
+                            <SkBtn color="primary" disabled={this.state.disableWithdrawETH}>Withdraw</SkBtn>
                           </Link>
                         </TableCell>
                       </TableRow>

@@ -33,6 +33,9 @@ import ChainsDropdown from './ChainsDropdown';
 import MainnetWeb3Connector from './MainnetWeb3Connector';
 import logo from '../meta/logos/skale-logo.svg';
 
+
+const tmpChains = ['thundering-saiph', 'handsome-zuben-elakrab', 'glamorous-capella', 'faint-alrai', 'rapping-phaet', 'magnificent-sabik', 'noisy-sterope', 'beautiful-rasalgethi', 'wailing-gorgonea-tertia', 'whispering-alniyat', 'melodic-murzim', 'elegant-ancha', 'stocky-kuma', 'glamorous-syrma', 'melodic-antares', 'faint-mirphak', 'rhythmic-sirius', 'faint-acubens', 'plain-dsiban', 'melodic-achird']
+
 const SkAppBar = styled(AppBar)({
     'background-color': 'rgb(22, 23, 29)',
     padding: '15px 0',
@@ -62,7 +65,8 @@ export default class Header extends React.Component {
       this.setState({skale: initSkale(this.props.mainnetWeb3)});
     }
 
-    let chains = await this.state.skale.contracts.schainsInternal.getSchainsNames();
+    // let chains = await this.state.skale.contracts.schainsInternal.getSchainsNames();
+    let chains = tmpChains;
     this.setState({
       'loading': false,
       schains: chains
@@ -82,6 +86,10 @@ export default class Header extends React.Component {
               web3={this.props.mainnetWeb3}
               setEndpoint={this.props.setEndpoint} 
               endpoint={this.props.endpoint}
+
+              currentAccount={this.props.currentAccount}
+              setCurrentAccount={this.props.setCurrentAccount}
+
               edge='right'
             />
             <ChainsDropdown edge='right' mainnetWeb3={this.props.mainnetWeb3} schains={this.state.schains} currentSchain={this.props.currentSchain} setCurrentSchain={this.props.setCurrentSchain}/>

@@ -54,12 +54,9 @@ class UnlockETH extends React.Component {
   async componentDidMount () {
     let res = await changeMetamaskNetwork(mainnetNetworkParams());
     let web3 = res[1];
-    let accounts = await web3.eth.getAccounts();
-    let account = accounts[0];
-
     this.setState({
       mainnetChain: new MainnetChain(web3, proxyMainnet),
-      address: account,
+      address: this.props.currentAccount,
       loading: false
     }); // todo: handle network change
   }
