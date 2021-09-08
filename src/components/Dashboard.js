@@ -79,7 +79,8 @@ class Dashboard extends React.Component {
         loading: true,
         chain: '',
         chainChanged: false,
-        disableWithdrawETH: true
+        disableWithdrawETH: true,
+        disableUnlock: true
     };
     this.balanceChecker=this.balanceChecker.bind(this);
   }
@@ -114,6 +115,8 @@ class Dashboard extends React.Component {
       schainName, this.props.currentAccount);
     
     let disableWithdrawETH = reimbursementWalletBalance == 0;
+
+    let disableUnlock = disableWithdrawETH || lockedAmount == 0;
     this.setState({
       loading: false,
       chainChanged: false,
@@ -124,6 +127,7 @@ class Dashboard extends React.Component {
       reimbursementWalletBalance: reimbursementWalletBalance,
       disableWithdrawETH: disableWithdrawETH,
       account: this.props.currentAccount,
+      disableUnlock: disableUnlock
     });
   }
 
@@ -147,7 +151,8 @@ class Dashboard extends React.Component {
               </div>
             </div>
       );
-    }
+    };
+
     if (loading || this.state.chain !== this.props.currentSchain ||  this.state.account !== this.props.currentAccount) {
       return (
         <div className="fullscreen-msg">
@@ -165,7 +170,7 @@ class Dashboard extends React.Component {
           </div>
         </div>
       );
-    }
+    };
 
     return (
       <div className="IMAUI">
@@ -256,8 +261,8 @@ class Dashboard extends React.Component {
                           <Link className='table-btn' to={this.state.disableWithdrawETH ? '#' : '/eth/withdraw'}>
                             <SkBtn color="primary" disabled={this.state.disableWithdrawETH} >Withdraw</SkBtn>
                           </Link>
-                          <Link className='table-btn' to={this.state.disableWithdrawETH ? '#' : '/eth/unlock'}>
-                            <SkBtn color="primary" disabled={this.state.disableWithdrawETH}>Unlock</SkBtn>
+                          <Link className='table-btn' to={this.state.disableUnlock ? '#' : '/eth/unlock'}>
+                            <SkBtn color="primary" disabled={this.state.disableUnlock}>Unlock</SkBtn>
                           </Link>
                           </TableCell>
                       </TableRow>
