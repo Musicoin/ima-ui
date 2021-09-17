@@ -23,6 +23,10 @@
 
 import Web3 from 'web3';
 import React from 'react';
+import { Link } from "react-router-dom";
+import { MainnetChain, SChain } from '@skalenetwork/ima-js';
+
+import ERC20Dashboard from './dashboard/ERC20Dashboard';
 
 import Container from '@material-ui/core/Container';
 import Box from '@material-ui/core/Box';
@@ -34,16 +38,14 @@ import TableContainer from '@material-ui/core/TableContainer';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
+import Typography from '@material-ui/core/Typography';
+import Tooltip from '@material-ui/core/Tooltip';
 
 import AccountBalanceWalletIcon from '@material-ui/icons/AccountBalanceWallet';
-
+import HelpOutlineIcon from '@material-ui/icons/HelpOutline';
 import CallMadeIcon from '@material-ui/icons/CallMade';
-import DnsIcon from '@material-ui/icons/Dns';
 import CircularProgress from '@material-ui/core/CircularProgress';
 
-import { Link } from "react-router-dom";
-
-import { MainnetChain, SChain } from '@skalenetwork/ima-js';
 import SkBtn from './SkBtn';
 
 import proxyMainnet from '../abis/proxyMainnet.json';
@@ -53,23 +55,6 @@ import { getSchainEndpoint, getSchainName } from '../networks';
 import { formatWeiBalance } from '../web3Helper';
 
 import ethLogo from '../meta/logos/eth.png';
-import skLogo from '../meta/logos/skale.png';
-import tetherLogo from '../meta/logos/tether.png';
-import usdcLogo from '../meta/logos/usdc.png';
-import uniLogo from '../meta/logos/uni.png';
-
-
-function createData(name, calories, fat, carbs, protein, icon) {
-  return { name, calories, fat, carbs, protein, icon };
-}
-
-
-const rows = [
-  createData('SKL', '150000.0', '600.0', 240, 4.0, skLogo),
-  createData('USDT', '2300.5', '900.0', 370, 4.3, tetherLogo),
-  createData('USDC', 0, 0, 0, 6.0, usdcLogo),
-  createData('UNI', '5900.0', 0, 9140, 6.0, uniLogo),
-];
 
 
 class Dashboard extends React.Component {
@@ -174,17 +159,15 @@ class Dashboard extends React.Component {
 
     return (
       <div className="IMAUI">
-        <Box component="span" m={1}>
+        <Box component="span" m={1} >
           <Container maxWidth="md">
-              <div className="flex-container marg-bott-20">
-                <div className="flex-container fl-centered">
-                  <AccountBalanceWalletIcon/>
-                </div>
-                <div className="flex-container fl-centered marg-left-10">
-                  <h2>
-                    Reimbursement wallet
-                  </h2>
-                </div>  
+              <div className="marg-top-20 marg-bott-40">
+                <h1 className='card-header'>
+                  Dashboard
+                </h1>
+                <Typography color="textSecondary">
+                  sChain {this.props.currentSchain}
+                </Typography>
               </div>
               <TableContainer component={Paper}>
                 <Table aria-label="simple table">
@@ -193,46 +176,47 @@ class Dashboard extends React.Component {
                         <TableCell component="th" scope="row" className='table-left-padd'>
                           <div className="flex-container">
                             <div className="flex-container fl-centered">
-                              <img src={ethLogo} className="coin-logo" alt="logo" />
+                              <AccountBalanceWalletIcon/>
                             </div>
                             <p className="coin-name flex-container">
-                              ETH
+                              IMA ETH
                             </p>
                           </div>
                         </TableCell>
                         <TableCell align="left">{formatWeiBalance(this.state.reimbursementWalletBalance)}</TableCell>
                         <TableCell align="right">
-                          <Link className='table-btn' to="/reimbursement/recharge">
-                            <SkBtn color="primary" >Recharge</SkBtn>
-                          </Link>
-                          <Link className='table-btn' to={this.state.disableWithdrawETH ? '#' : '/reimbursement/withdraw'}>
-                            <SkBtn color="primary" disabled={this.state.disableWithdrawETH}>Withdraw</SkBtn>
-                          </Link>
-
+                          <div className="flex-container fl-right">
+                              <div className="fl-centered">
+                                <Link className='table-btn' to="/reimbursement/recharge">
+                                  <SkBtn color="primary" >Recharge</SkBtn>
+                                </Link>
+                              </div>
+                              <div className="fl-centered">
+                                <Link className='table-btn' to={this.state.disableWithdrawETH ? '#' : '/reimbursement/withdraw'}>
+                                  <SkBtn color="primary" disabled={this.state.disableWithdrawETH}>Withdraw</SkBtn>
+                                </Link>
+                              </div>
+                              <div className="fl-centered marg-ri-20">
+                                <Tooltip title="To withdraw funds from the chain you'll need some amount of ETH locked on the Mainnet">  
+                                    <HelpOutlineIcon className='active-help-icon'/>
+                                </Tooltip>
+                              </div>
+                            </div>
                           </TableCell>
+                          
                       </TableRow>
                   </TableBody>
                 </Table>
               </TableContainer>
           </Container>
         </Box>
-        <Box component="span" m={1}>
-          <Container maxWidth="md">
-              <div className="flex-container marg-bott-20">
-                <div className="flex-container fl-centered">
-                  <DnsIcon/>
-                </div>
-                <div className="flex-container fl-centered marg-left-10">
-                  <h2>
-                    {this.props.currentSchain}
-                  </h2>
-                </div>  
-              </div>
+        <Box component="span" m={1} >
+          <Container maxWidth="md"  className='marg-top-20 marg-bott-40'>
               <TableContainer component={Paper}>
                 <Table aria-label="simple table">
                   <TableHead>
                     <TableRow>
-                      <TableCell className='table-left-padd'>Token</TableCell>
+                      <TableCell className='table-left-padd'>Asset</TableCell>
                       <TableCell align="right">Mainnet balance</TableCell>
                       <TableCell align="right">sChain balance</TableCell>
                       <TableCell align="right">Locked Mainnet balance</TableCell>
@@ -271,51 +255,7 @@ class Dashboard extends React.Component {
               </TableContainer>
           </Container>
         </Box>
-        <Box component="span" m={1}>
-          <Container maxWidth="md">
-              <h3>
-                ERC20 Tokens
-              </h3>
-              <TableContainer component={Paper} className='marg-bott-40'>
-                <Table aria-label="simple table">
-                <TableHead>
-                    <TableRow>
-                      <TableCell className='table-left-padd'>Token</TableCell>
-                      <TableCell align="right">Mainnet balance</TableCell>
-                      <TableCell align="right">sChain balance</TableCell>
-                      <TableCell align="right"></TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {rows.map((row) => (
-                      <TableRow key={row.name}>
-                        <TableCell component="th" scope="row" className='table-left-padd'>
-                          <div className="flex-container">
-                              <div className="flex-container fl-centered">
-                                <img src={row.icon} className="coin-logo" alt="logo" />
-                              </div>
-                              <p className="coin-name flex-container">
-                                {row.name}
-                              </p>
-                            </div>
-                        </TableCell>
-                        <TableCell align="right">{row.calories}</TableCell>
-                        <TableCell align="right">{row.fat}</TableCell>
-                        <TableCell align="right">
-                        <Link className='table-btn' to="/eth/deposit">
-                            <SkBtn color="primary" >Deposit</SkBtn>
-                          </Link>
-                          <Link className='table-btn' to={this.state.disableWithdrawETH ? '#' : "/eth/withdraw"}>
-                            <SkBtn color="primary" disabled={this.state.disableWithdrawETH}>Withdraw</SkBtn>
-                          </Link>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-          </Container>
-        </Box>
+        <ERC20Dashboard/>
       </div>
     );
   }

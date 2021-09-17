@@ -27,6 +27,7 @@ import Web3 from 'web3';
 
 import Header from './components/Header';
 
+import Admin from './components/admin/Admin';
 import Dashboard from './components/Dashboard';
 import DepositETH from './components/DepositETH';
 import WithdrawETH from './components/WithdrawETH';
@@ -107,9 +108,15 @@ function AppWrap() {
             <Withdraw mainnetWeb3={mainnetWeb3} currentSchain={currentSchain} currentAccount={currentAccount}/>
           </Route>
 
+
+          <Route path="/admin">
+            <Admin mainnetWeb3={mainnetWeb3} currentSchain={currentSchain} currentAccount={currentAccount}/>
+          </Route>
+
           <Route path="/">
             <Dashboard mainnetWeb3={mainnetWeb3} currentSchain={currentSchain} currentAccount={currentAccount}/>
           </Route>
+
         </Switch>
       </div>
     </Router>

@@ -48,6 +48,10 @@
   vertical-align: middle;
 }
 
+.fl-right {
+  justify-content: end;
+}
+
 .fl-centered {
   align-items: center;
   justify-content: center;
@@ -186,3 +190,11 @@
   width: 100%;
 }
 
+.MuiTypography-body1{
+  font-weight: 500 !important;
+}
+
+.active-help-icon{
+  padding-top: 5px;
+  color: rgb(46 123 204);
+}
