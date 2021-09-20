@@ -47,12 +47,17 @@ import CallMadeIcon from '@material-ui/icons/CallMade';
 import CircularProgress from '@material-ui/core/CircularProgress';
 
 import SkBtn from '../SkBtn';
+import SkBtnFilled from '../SkBtnFilled';
+
+import TextField from '@material-ui/core/TextField'
 
 import proxyMainnet from '../../abis/proxyMainnet.json';
 import proxySchain from '../../abis/proxySchain.json';
 
-import { getSchainEndpoint, getSchainName } from '../../networks';
+import { getSchainEndpoint, changeMetamaskNetwork, mainnetNetworkParams, schainNetworkParams, getSchainName } from '../../networks';
 import { formatWeiBalance } from '../../web3Helper';
+
+const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
 
 
 class Admin extends React.Component {
@@ -62,14 +67,17 @@ class Admin extends React.Component {
         loading: true,
         chain: '',
         chainChanged: false,
-        disableWithdrawETH: true,
-        disableUnlock: true
+        erc20OnMainnet: '',
+        erc20OnSchain: ''
     };
-    this.balanceChecker=this.balanceChecker.bind(this);
+    this.loader=this.loader.bind(this);
+    this.linkToken=this.linkToken.bind(this);
+    this.handleErc20OnMainnetChange=this.handleErc20OnMainnetChange.bind(this);
+    this.handleErc20OnSchainChange=this.handleErc20OnSchainChange.bind(this);
   }
 
   componentDidMount() {
-    var intervalId = setInterval(this.balanceChecker, 5000);
+    var intervalId = setInterval(this.loader, 5000);
     this.setState({intervalId: intervalId});
   }
  
@@ -77,7 +85,7 @@ class Admin extends React.Component {
     clearInterval(this.state.intervalId);
   }
 
-  async balanceChecker() {
+  async loader() {
     if (!this.props.mainnetWeb3) return;
     this.setState({mainnetChain: new MainnetChain(this.props.mainnetWeb3, proxyMainnet)}); // todo: handle network change
 
@@ -94,6 +102,45 @@ class Admin extends React.Component {
       chain: this.props.currentSchain,
       account: this.props.currentAccount
     });
+  }
+
+  async linkToken() {
+    const opts = {
+      address: this.state.account
+    }
+
+    let schainName = getSchainName(this.props.currentSchain);
+
+    let res = await changeMetamaskNetwork(mainnetNetworkParams());
+    let web3 = res[1];
+    this.setState({mainnetChain: new MainnetChain(web3, proxyMainnet)});
+
+    const isERC20AddedMainnet = await this.state.mainnetChain.isERC20Added(schainName, this.state.erc20OnMainnet);
+
+    console.log('isERC20AddedMainnet');
+    console.log(isERC20AddedMainnet);
+    if (!isERC20AddedMainnet){
+        await this.state.mainnetChain.addERC20TokenByOwner(schainName, this.state.erc20OnMainnet, opts);
+    }
+
+    let schainRes = await changeMetamaskNetwork(schainNetworkParams());
+    let schainWeb3 = schainRes[1];
+    this.setState({sChain: new SChain(schainWeb3, proxySchain)});
+
+    const isERC20AddedSchain = await this.state.sChain.isERC20Added(this.state.erc20OnMainnet);
+    console.log('isERC20AddedSchain');
+    console.log(isERC20AddedSchain);
+    if (isERC20AddedSchain === ZERO_ADDRESS) {
+        await this.state.sChain.addERC20TokenByOwner(this.state.erc20OnMainnet, this.state.erc20OnSchain, opts);
+    }
+  }
+
+  handleErc20OnMainnetChange(e) {
+    this.setState({erc20OnMainnet: e.target.value});
+  }
+
+  handleErc20OnSchainChange(e) {
+    this.setState({erc20OnSchain: e.target.value});
   }
 
   render() {
@@ -122,7 +169,19 @@ class Admin extends React.Component {
       <div className="IMAUI">
         <Box component="span" m={1} >
           <Container maxWidth="md">
-            !!!!!
+            <h2 className='card-header'>
+              Link token
+            </h2>
+            <Typography color="textSecondary">
+              to {this.props.currentSchain}
+            </Typography>
+            <form noValidate autoComplete="off" className="marg-top-30">
+                <TextField id="outlined-basic" label="erc20OnMainnet" variant="outlined" className='wide' value={this.state.erc20OnMainnet} onChange={this.handleErc20OnMainnetChange} />
+                <TextField id="outlined-basic" label="erc20OnSchain" variant="outlined" className='wide marg-top-20 marg-bott-20' value={this.state.erc20OnSchain} onChange={this.handleErc20OnSchainChange}/>
+                <SkBtnFilled size="large" className='marg-top-20' variant="contained" color="primary" onClick={this.linkToken}>
+                  Link token
+                </SkBtnFilled>
+            </form>
           </Container>
         </Box>
       </div>

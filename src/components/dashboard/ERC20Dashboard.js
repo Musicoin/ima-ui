@@ -24,6 +24,13 @@
 import Web3 from 'web3';
 import React from 'react';
 
+import { MainnetChain, SChain } from '@skalenetwork/ima-js';
+
+import proxyMainnet from '../../abis/proxyMainnet.json';
+import proxySchain from '../../abis/proxySchain.json';
+
+import { getSchainEndpoint, getSchainName } from '../../networks';
+
 import Container from '@material-ui/core/Container';
 import Box from '@material-ui/core/Box';
 
@@ -34,59 +41,156 @@ import TableContainer from '@material-ui/core/TableContainer';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
+import CircularProgress from '@material-ui/core/CircularProgress';
 
 
 import { Link } from "react-router-dom";
 
 import SkBtn from '../SkBtn';
 
-import skLogo from '../../meta/logos/skale.png';
-import tetherLogo from '../../meta/logos/tether.png';
-import usdcLogo from '../../meta/logos/usdc.png';
-import uniLogo from '../../meta/logos/mkr.png';
+import { formatWeiBalance } from '../../web3Helper';
 
 import tokensMeta from '../../meta/tokens.json';
+import erc20Abi from '../../meta/defaultAbis/erc20.json'
 
+const erc20Tokens = tokensMeta['erc20'];
+
+function importAll(r) {
+  let images = {};
+  r.keys().map((item, index) => { images[item.replace('./', '')] = r(item); });
+  return images;
+}
+
+const images = importAll(require.context('../../meta/logos', false, /\.(png|jpe?g|svg)$/));
 
 function createData(name, symbol, mainnetBalance, sChainBalance, logo) {
   return { name, symbol, mainnetBalance, sChainBalance, logo };
 }
 
-const rows = [
-  createData('SKALE', 'SKL', '150000.0', '600.0', skLogo),
-  createData('Tether', 'USDT', '2300.5', '900.0',  tetherLogo),
-  createData('USDC', 'USDC', 0, 0,usdcLogo),
-  createData('Maker', 'MKR', '5900.0', 0, uniLogo),
-];
-
+const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
 
 export default class ERC20Dashboard extends React.Component {
   constructor(props) {
     super(props);
-
-    console.log(tokensMeta);
     this.state = {
-      tokensData: []
+      tokensData: [],
+      tokensInited: false,
+      loading: true
     };
+    this.updateTokens=this.updateTokens.bind(this);
+    this.initTokens=this.initTokens.bind(this);
+    this.loadBalances=this.loadBalances.bind(this);
   }
 
   componentDidMount() {
-    this.loadTokens();
+    var intervalId = setInterval(this.updateTokens, 5000);
+    this.setState({intervalId: intervalId});
   }
  
   componentWillUnmount() {
-    
+    clearInterval(this.state.intervalId);
   }
 
-  loadTokens() {
+  async updateTokens() {
+    if (!this.props.mainnetWeb3) return;
+    if (!this.state.mainnetChain) {
+      this.setState({mainnetChain: new MainnetChain(this.props.mainnetWeb3, proxyMainnet)}); // todo: handle network change
+    }
 
-    
-    
-    this.setState({tokens: tokensMeta})
+    let initSchainIMA = this.props.currentSchain && (this.state.chain !== this.props.currentSchain || !this.state.sChain);
+    if (initSchainIMA) {
+      let sChainEndpoint = getSchainEndpoint(this.props.currentSchain);
+      let sChainWeb3 = new Web3(sChainEndpoint);
+      this.setState({sChain: new SChain(sChainWeb3, proxySchain)});
+    }
+    if (!this.state.sChain) return;
+    if (!this.state.tokensInited || initSchainIMA) {
+      await this.initTokens();
+    }
+    await this.loadBalances();
+  }
+
+  async loadBalances() {
+    let tokensData = this.state.tokensData;
+    for (let idx in tokensData) {
+      let tokenInfo = tokensData[idx];
+      tokenInfo['mainnetBalance'] = await this.state.mainnetChain.getERC20Balance(tokenInfo['symbol'], this.props.currentAccount);
+      if (tokenInfo.linked){
+        tokenInfo['sChainBalance'] = await this.state.sChain.getERC20Balance(tokenInfo['symbol'], this.props.currentAccount);
+      }
+    }
+    this.setState({
+      tokensData: tokensData,
+      loading: false,
+      chain: this.props.currentSchain,
+      account: this.props.currentAccount
+    });
+  }
+
+  async initTokens() {
+    let tokensData = [];
+    let schainName = getSchainName(this.props.currentSchain);
+
+    for (let tokenSymbol in erc20Tokens) {
+      const erc20OnMainnet = erc20Tokens[tokenSymbol].address;
+
+      const linkedMainnet = await this.state.mainnetChain.isERC20Added(schainName, erc20OnMainnet);
+      const mainnetContract = new this.state.mainnetChain.web3.eth.Contract(erc20Abi.abi, erc20OnMainnet);
+
+      this.state.mainnetChain.addERC20Token(tokenSymbol, mainnetContract);
+      
+      let erc20OnSchain = await this.state.sChain.isERC20Added(erc20OnMainnet);
+      const linkedSchain = (erc20OnSchain !== ZERO_ADDRESS);
+      if (linkedSchain){
+        let erc20SchainContract = new this.state.sChain.web3.eth.Contract(erc20Abi.abi, erc20OnSchain);
+        this.state.sChain.addERC20Token(tokenSymbol, erc20SchainContract);
+      }
+
+      let logo;
+      if (images[tokenSymbol.toLowerCase() + '.png']) {
+        logo = images[tokenSymbol.toLowerCase() + '.png'].default; 
+      }
+
+      tokensData.push({
+        'symbol': tokenSymbol,
+        'name': erc20Tokens[tokenSymbol].name,
+        'linked': linkedMainnet && linkedSchain,
+        'logo': logo,
+        'mainnetBalance': '',
+        'sChainBalance': ''
+      });
+    }
+
+    this.setState({
+      tokensInited: true,
+      tokensData: tokensData
+    });
   }
 
   render() {
-    const { tokensData } = this.state;
+    const { tokensData, loading } = this.state;
+
+    if (loading || this.state.chain !== this.props.currentSchain ||  this.state.account !== this.props.currentAccount) {
+      return (
+        <Box component="span" m={1}>
+          <Container maxWidth="md">
+              <h2 className='marg-bott-40'>
+                ERC20 Tokens
+              </h2>
+              <div className="flex-container fl-centered">
+                <div className="flex-container fl-centered">
+                  <CircularProgress className='fullscreen-spin' />
+                </div>  
+                <div className="flex-container fl-centered">
+                  <h4 className='fullscreen-msg-text'>
+                    Loading ERC20 tokens
+                  </h4>
+                </div>
+              </div>
+          </Container>
+        </Box>
+      );
+    };
 
     return (
       <Box component="span" m={1}>
@@ -105,7 +209,7 @@ export default class ERC20Dashboard extends React.Component {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {rows.map((row) => (
+                  {tokensData.map((row) => (
                     <TableRow key={row.name}>
                       <TableCell component="th" scope="row" className='table-left-padd'>
                         <div className="flex-container">
@@ -117,15 +221,19 @@ export default class ERC20Dashboard extends React.Component {
                             </p>
                           </div>
                       </TableCell>
-                      <TableCell align="right">{row.mainnetBalance}</TableCell>
-                      <TableCell align="right">{row.sChainBalance}</TableCell>
+                      <TableCell align="right">{formatWeiBalance(row.mainnetBalance)}</TableCell>
+                      <TableCell align="right">{formatWeiBalance(row.sChainBalance)}</TableCell>
                       <TableCell align="right">
-                      <Link className='table-btn' to="/eth/deposit">
-                          <SkBtn color="primary" >Deposit</SkBtn>
-                        </Link>
-                        <Link className='table-btn' to={this.state.disableWithdrawETH ? '#' : "/eth/withdraw"}>
-                          <SkBtn color="primary" disabled={this.state.disableWithdrawETH}>Withdraw</SkBtn>
-                        </Link>
+                        {row.linked ? (
+                          <div>
+                                <Link className='table-btn' to={'/deposit-erc20/' + row.symbol}>
+                            <SkBtn color="primary" >Deposit</SkBtn>
+                          </Link>
+                          <Link className='table-btn'  to={'/withdraw-erc20/' + row.symbol}>
+                            <SkBtn color="primary" disabled={this.state.disableWithdrawETH}>Withdraw</SkBtn>
+                          </Link>
+                          </div>
+                        ) : <SkBtn color="primary" disabled='true'>Token is not linked</SkBtn>}
                       </TableCell>
                     </TableRow>
                   ))}

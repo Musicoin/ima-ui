@@ -27,6 +27,8 @@ import { Link } from "react-router-dom";
 import { MainnetChain, SChain } from '@skalenetwork/ima-js';
 
 import ERC20Dashboard from './dashboard/ERC20Dashboard';
+import ERC721Dashboard from './dashboard/ERC721Dashboard';
+import ERC1155Dashboard from './dashboard/ERC1155Dashboard';
 
 import Container from '@material-ui/core/Container';
 import Box from '@material-ui/core/Box';
@@ -255,7 +257,9 @@ class Dashboard extends React.Component {
               </TableContainer>
           </Container>
         </Box>
-        <ERC20Dashboard/>
+        <ERC20Dashboard mainnetWeb3={this.props.mainnetWeb3} currentSchain={this.props.currentSchain} currentAccount={this.props.currentAccount}/>
+        <ERC721Dashboard/>
+        <ERC1155Dashboard/>
       </div>
     );
   }
