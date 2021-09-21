@@ -63,10 +63,6 @@ function importAll(r) {
 
 const images = importAll(require.context('../../meta/logos', false, /\.(png|jpe?g|svg)$/));
 
-function createData(name, symbol, mainnetBalance, sChainBalance, logo) {
-  return { name, symbol, mainnetBalance, sChainBalance, logo };
-}
-
 const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
 
 export default class ERC20Dashboard extends React.Component {
@@ -83,7 +79,7 @@ export default class ERC20Dashboard extends React.Component {
   }
 
   componentDidMount() {
-    var intervalId = setInterval(this.updateTokens, 5000);
+    var intervalId = setInterval(this.updateTokens, 7000);
     this.setState({intervalId: intervalId});
   }
  
@@ -114,9 +110,13 @@ export default class ERC20Dashboard extends React.Component {
     let tokensData = this.state.tokensData;
     for (let idx in tokensData) {
       let tokenInfo = tokensData[idx];
-      tokenInfo['mainnetBalance'] = await this.state.mainnetChain.getERC20Balance(tokenInfo['symbol'], this.props.currentAccount);
-      if (tokenInfo.linked){
-        tokenInfo['sChainBalance'] = await this.state.sChain.getERC20Balance(tokenInfo['symbol'], this.props.currentAccount);
+      try {
+        tokenInfo['mainnetBalance'] = await this.state.mainnetChain.getERC20Balance(tokenInfo['symbol'], this.props.currentAccount);
+        if (tokenInfo.linked){
+          tokenInfo['sChainBalance'] = await this.state.sChain.getERC20Balance(tokenInfo['symbol'], this.props.currentAccount);
+        }
+      } catch (err) {
+        console.error(err);
       }
     }
     this.setState({
