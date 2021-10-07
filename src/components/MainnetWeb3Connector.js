@@ -61,8 +61,6 @@ export default function MainnetWeb3Connector(props) {
   const [inputEndpoint, setInputEndpoint] = React.useState(localStorage.getItem('skMainnetEndpoint') || '');
   const open = Boolean(edit);
 
-
-
   const addListeners = () => {
     window.ethereum.on('accountsChanged', handleAccountsChanged); // todo: do only once!!!!
     window.ethereum

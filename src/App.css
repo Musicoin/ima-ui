@@ -48,6 +48,10 @@
   vertical-align: middle;
 }
 
+.fl-right {
+  justify-content: end;
+}
+
 .fl-centered {
   align-items: center;
   justify-content: center;
@@ -140,6 +144,13 @@
   margin-bottom: 40px !important;
 }
 
+.spin-sm{
+  width: 20px !important;
+  height: 20px !important;
+  color: rgb(61, 61, 61) !important;
+}
+
+
 .fullscreen-spin{
   width: 30px !important;
   height: 30px !important;
@@ -186,3 +197,11 @@
   width: 100%;
 }
 
+.MuiTypography-body1{
+  font-weight: 500 !important;
+}
+
+.active-help-icon{
+  padding-top: 5px;
+  color: rgba(0, 0, 0, 0.4);
+}

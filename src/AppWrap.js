@@ -27,10 +27,14 @@ import Web3 from 'web3';
 
 import Header from './components/Header';
 
+import Admin from './components/admin/Admin';
 import Dashboard from './components/Dashboard';
 import DepositETH from './components/DepositETH';
 import WithdrawETH from './components/WithdrawETH';
 import UnlockETH from './components/UnlockETH';
+
+import DepositERC20 from './components/DepositERC20';
+import WithdrawERC20 from './components/WithdrawERC20';
 
 import Recharge from './components/reimbursement/Recharge';
 import Withdraw from './components/reimbursement/Withdraw';
@@ -47,18 +51,9 @@ import React, { useState, useEffect } from 'react';
 function AppWrap() {
   const [endpoint, setEndpoint] = React.useState(localStorage.getItem('skMainnetEndpoint') || '');
   const [mainnetWeb3, setMainnetWeb3] = useState(undefined);
-  // const [schainWeb3, setSchainWeb3] = useState(undefined);
   const [currentSchain, setCurrentSchain] = useState('');
   const [currentAccount, setCurrentAccount] = useState(undefined);
 
-  // useEffect(() => {
-  //   async function getMainnetWeb3() {
-  //       let res = await changeMetamaskNetwork(mainnetNetworkParams());
-  //       let web3 = res[1];
-  //       setMainnetWeb3(web3);
-  //   }
-  //   getMainnetWeb3();
-  // }, []);
 
   useEffect(() => {
     async function getMainnetWeb3() {
@@ -106,6 +101,21 @@ function AppWrap() {
           <Route path="/reimbursement/withdraw">
             <Withdraw mainnetWeb3={mainnetWeb3} currentSchain={currentSchain} currentAccount={currentAccount}/>
           </Route>
+
+
+          <Route path="/admin">
+            <Admin mainnetWeb3={mainnetWeb3} currentSchain={currentSchain} currentAccount={currentAccount}/>
+          </Route>
+
+          <Route
+            path="/deposit-erc20/:tokenSymbol"
+            children={<DepositERC20 mainnetWeb3={mainnetWeb3} currentSchain={currentSchain} currentAccount={currentAccount}/>}
+          />
+
+          <Route
+            path="/withdraw-erc20/:tokenSymbol"
+            children={<WithdrawERC20 mainnetWeb3={mainnetWeb3} currentSchain={currentSchain} currentAccount={currentAccount}/>}
+          />
 
           <Route path="/">
             <Dashboard mainnetWeb3={mainnetWeb3} currentSchain={currentSchain} currentAccount={currentAccount}/>
