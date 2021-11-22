@@ -1759,10 +1759,10 @@
   dependencies:
     "@sinonjs/commons" "^1.7.0"
 
-"@skalenetwork/ima-js@0.1.0":
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/@skalenetwork/ima-js/-/ima-js-0.1.0.tgz#2514f74ec2706fd867a9418594600243dfa121be"
-  integrity sha512-6Z2xiA6S1fvEB6TNFxHET+ewOhZAjACvm1iXxxc9k1rTQD7RWLwUMzz1Xl960Gost1SSCrqeubll1OkP+xYC3w==
+"@skalenetwork/ima-js@0.4.0-develop.0":
+  version "0.4.0-develop.0"
+  resolved "https://registry.yarnpkg.com/@skalenetwork/ima-js/-/ima-js-0.4.0-develop.0.tgz#b8a325daf6d2097a79be862ce9d7b31ad1005cb0"
+  integrity sha512-29+zbEPEEHNZZkWM9aBdKZjp5nhdZfOCVxteMRtZmpn5TPadYes1Ebj/i2OJLKVDiPOzdBDazk8N/OY9y7T/lQ==
   dependencies:
     tslog "^3.2.0"
     web3 "1.4.0"

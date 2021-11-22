@@ -52,7 +52,6 @@ class WithdrawERC20 extends React.Component {
     super(props);
     this.state = {
       amount: '',
-      receiver: '',
       address: '',
       wait: false,
       redirect: false,
@@ -61,7 +60,6 @@ class WithdrawERC20 extends React.Component {
 
     this.web3Lookup = this.web3Lookup.bind(this);
     this.withdrawERC20 = this.withdrawERC20.bind(this);
-    this.handleReceiverChange = this.handleReceiverChange.bind(this);
     this.handleAmountChange = this.handleAmountChange.bind(this);
   }
 
@@ -74,7 +72,6 @@ class WithdrawERC20 extends React.Component {
       sChain: new SChain(web3, proxySchain),
       address: this.props.currentAccount,
       account: this.props.currentAccount,
-      receiver: this.props.currentAccount,
       tokenSymbol: tokenSymbol
     });
     await this.web3Lookup();
@@ -120,14 +117,10 @@ class WithdrawERC20 extends React.Component {
     const balanceMainnet = await this.state.mainnetChain.getERC20Balance(token, address);
     let erc20OnMainnet = tokensMeta.erc20[token].address;
     await this.state.sChain.approveERC20Transfers(token, amountWei, opts);
-    await this.state.sChain.withdrawERC20(erc20OnMainnet, address, amountWei, opts);
+    await this.state.sChain.withdrawERC20(erc20OnMainnet, amountWei, opts);
     await this.state.mainnetChain.waitERC20BalanceChange(token, address, balanceMainnet);
 
     this.setState({ redirect: true });
-  }
-
-  handleReceiverChange(e) {
-    this.setState({ receiver: e.target.value });
   }
 
   handleAmountChange(e) {
@@ -189,7 +182,6 @@ class WithdrawERC20 extends React.Component {
                 from {this.props.currentSchain}
               </Typography>
               <form noValidate autoComplete="off" className="marg-top-30">
-                  <TextField id="outlined-basic" label="Receiver" variant="outlined" className='wide' value={this.state.receiver} onChange={this.handleReceiverChange} />
                   <TextField id="outlined-basic" label="Amount" variant="outlined" className='wide marg-top-20 marg-bott-20' value={this.state.amount} onChange={this.handleAmountChange}/>
                   <SkBtnFilled size="large" className='marg-top-20' variant="contained" color="primary" onClick={this.withdrawERC20}>
                     Withdraw

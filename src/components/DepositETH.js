@@ -57,7 +57,6 @@ class DepositETH extends React.Component {
         redirect: false
     };
     this.depositETH=this.depositETH.bind(this);
-    this.handleReceiverChange=this.handleReceiverChange.bind(this);
     this.handleAmountChange=this.handleAmountChange.bind(this);
   }
 
@@ -72,15 +71,10 @@ class DepositETH extends React.Component {
     let sChainBalanceBefore = await this.state.sChain.ethBalance(this.state.address);
     await this.state.mainnetChain.depositETHtoSChain(
         "Bob",
-        this.state.receiver,
         txOpts
     );
     await this.state.sChain.waitETHBalanceChange(this.state.address, sChainBalanceBefore);
     this.setState({redirect: true});
-  }
-
-  handleReceiverChange(e) {
-      this.setState({receiver: e.target.value});
   }
 
   handleAmountChange(e) {
@@ -144,7 +138,6 @@ class DepositETH extends React.Component {
                 to {this.props.currentSchain}
               </Typography>
               <form noValidate autoComplete="off" className="marg-top-30">
-                  <TextField id="outlined-basic" label="Receiver" variant="outlined" className='wide' value={this.state.receiver} onChange={this.handleReceiverChange} />
                   <TextField id="outlined-basic" label="Amount" variant="outlined" className='wide marg-top-20 marg-bott-20' value={this.state.amount} onChange={this.handleAmountChange}/>
                   <SkBtnFilled size="large" className='marg-top-20' variant="contained" color="primary" onClick={this.depositETH}>
                     Deposit
