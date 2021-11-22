@@ -48,7 +48,6 @@ class WithdrawETH extends React.Component {
     super(props);
     this.state = {
       amount: '',
-      receiver: '',
       address: '',
       wait: false,
       redirect: false,
@@ -57,7 +56,6 @@ class WithdrawETH extends React.Component {
 
     this.web3Lookup = this.web3Lookup.bind(this);
     this.withdrawETH = this.withdrawETH.bind(this);
-    this.handleReceiverChange = this.handleReceiverChange.bind(this);
     this.handleAmountChange = this.handleAmountChange.bind(this);
   }
 
@@ -68,8 +66,7 @@ class WithdrawETH extends React.Component {
 
     this.setState({
       sChain: new SChain(web3, proxySchain),
-      address: this.props.currentAccount,
-      receiver: this.props.currentAccount
+      address: this.props.currentAccount
     });
     await this.web3Lookup();
 
@@ -99,7 +96,6 @@ class WithdrawETH extends React.Component {
     let lockedETHAmount = await this.state.mainnetChain.lockedETHAmount(this.state.address);
 
     await this.state.sChain.withdrawETH(
-      this.state.address,
       amountWei,
       {
         address: this.state.address
@@ -107,10 +103,6 @@ class WithdrawETH extends React.Component {
     );
     await this.state.mainnetChain.waitLockedETHAmountChange(this.state.address, lockedETHAmount);
     this.setState({ redirect: true });
-  }
-
-  handleReceiverChange(e) {
-    this.setState({ receiver: e.target.value });
   }
 
   handleAmountChange(e) {
@@ -172,7 +164,6 @@ class WithdrawETH extends React.Component {
                 from {this.props.currentSchain}
               </Typography>
               <form noValidate autoComplete="off" className="marg-top-30">
-                  <TextField id="outlined-basic" label="Receiver" variant="outlined" className='wide' value={this.state.receiver} onChange={this.handleReceiverChange} />
                   <TextField id="outlined-basic" label="Amount" variant="outlined" className='wide marg-top-20 marg-bott-20' value={this.state.amount} onChange={this.handleAmountChange}/>
                   <SkBtnFilled size="large" className='marg-top-20' variant="contained" color="primary" onClick={this.withdrawETH}>
                     Withdraw

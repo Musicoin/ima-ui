@@ -67,6 +67,7 @@ export default class Recharge extends React.Component {
     let schainName = getSchainName(this.props.currentSchain);
     await this.state.mainnetChain.reimbursementWalletRecharge(
         schainName,
+        this.state.address,
         txOpts
     );
     this.setState({redirect: true});

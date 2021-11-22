@@ -99,7 +99,7 @@ class Dashboard extends React.Component {
     let schainName = getSchainName(this.props.currentSchain);
 
     let reimbursementWalletBalance = await this.state.mainnetChain.reimbursementWalletBalance(
-      schainName, this.props.currentAccount);
+      this.props.currentAccount, schainName);
     
     let disableWithdrawETH = reimbursementWalletBalance == 0;
 

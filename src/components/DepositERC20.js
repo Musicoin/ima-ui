@@ -56,13 +56,11 @@ class DepositERC20 extends React.Component {
     super(props);
     this.state = {
         amount: '',
-        receiver: '',
         address: '',
         wait: false,
         redirect: false
     };
     this.deposit=this.deposit.bind(this);
-    this.handleReceiverChange=this.handleReceiverChange.bind(this);
     this.handleAmountChange=this.handleAmountChange.bind(this);
   }
 
@@ -80,13 +78,9 @@ class DepositERC20 extends React.Component {
     
     const balanceSchain = await this.state.sChain.getERC20Balance(token, address);
     await this.state.mainnetChain.approveERC20Transfers(token, amountWei, opts);
-    await this.state.mainnetChain.depositERC20(schainName, token, address, amountWei, opts);
+    await this.state.mainnetChain.depositERC20(schainName, token, amountWei, opts);
     await this.state.sChain.waitERC20BalanceChange(token, address, balanceSchain);
     this.setState({redirect: true});
-  }
-
-  handleReceiverChange(e) {
-      this.setState({receiver: e.target.value});
   }
 
   handleAmountChange(e) {
@@ -118,7 +112,6 @@ class DepositERC20 extends React.Component {
     this.setState({
       mainnetChain: mainnetChain,
       address: this.props.currentAccount,
-      receiver: this.props.currentAccount,
       loading: false,
       chain: this.props.currentSchain,
       account: this.props.currentAccount,
@@ -162,7 +155,6 @@ class DepositERC20 extends React.Component {
                 to {this.props.currentSchain}
               </Typography>
               <form noValidate autoComplete="off" className="marg-top-30">
-                  <TextField id="outlined-basic" label="Receiver" variant="outlined" className='wide' value={this.state.receiver} onChange={this.handleReceiverChange} />
                   <TextField id="outlined-basic" label="Amount" variant="outlined" className='wide marg-top-20 marg-bott-20' value={this.state.amount} onChange={this.handleAmountChange}/>
                   <SkBtnFilled size="large" className='marg-top-20' variant="contained" color="primary" onClick={this.deposit}>
                     Deposit
