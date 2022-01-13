@@ -39,6 +39,8 @@ import WithdrawERC20 from './components/WithdrawERC20';
 import Recharge from './components/reimbursement/Recharge';
 import Withdraw from './components/reimbursement/Withdraw';
 
+import {CUSTOM_SCHAIN_NAME} from './networks';
+
 import {
   BrowserRouter as Router,
   Switch,
@@ -51,13 +53,13 @@ import React, { useState, useEffect } from 'react';
 function AppWrap() {
   const [endpoint, setEndpoint] = React.useState(localStorage.getItem('skMainnetEndpoint') || '');
   const [mainnetWeb3, setMainnetWeb3] = useState(undefined);
-  const [currentSchain, setCurrentSchain] = useState('');
+  const [currentSchain, setCurrentSchain] = useState(CUSTOM_SCHAIN_NAME);
   const [currentAccount, setCurrentAccount] = useState(undefined);
 
 
   useEffect(() => {
     async function getMainnetWeb3() {
-        setMainnetWeb3(undefined);  
+        setMainnetWeb3(undefined);
         let web3 = new Web3(endpoint);
         try {
           await web3.eth.getBlockNumber();
@@ -74,7 +76,7 @@ function AppWrap() {
       <Router>
         <Header
           endpoint={endpoint}
-          setEndpoint={setEndpoint} 
+          setEndpoint={setEndpoint}
           mainnetWeb3={mainnetWeb3}
           currentSchain={currentSchain}
           setCurrentSchain={setCurrentSchain}
